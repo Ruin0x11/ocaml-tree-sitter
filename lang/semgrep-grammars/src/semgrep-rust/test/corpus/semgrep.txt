@@ -189,3 +189,277 @@ foo(...)
       )
     )
   )
+
+=====================================
+Let statement ellipsis
+=====================================
+
+__SEMGREP_EXPRESSION
+let ... = ...;
+
+---
+
+(source_file
+  (semgrep_expression
+    (let_declaration
+      (ellipsis)
+      (ellipsis)
+      )
+    )
+  )
+
+=====================================
+Let statement metavariable
+=====================================
+
+__SEMGREP_EXPRESSION
+let $X = $Y;
+
+---
+
+(source_file
+  (semgrep_expression
+    (let_declaration
+      (identifier)
+      (identifier)
+      )
+    )
+  )
+
+=====================================
+Let mut statement metavariable
+=====================================
+
+__SEMGREP_EXPRESSION
+let mut $X = $Y;
+
+---
+
+(source_file
+  (semgrep_expression
+    (let_declaration
+      (mutable_specifier)
+      (identifier)
+      (identifier)
+      )
+    )
+  )
+
+=====================================
+Multiple statements
+=====================================
+
+__SEMGREP_EXPRESSION
+let $X = $Y;
+...
+foo($X);
+bar($X)
+
+---
+
+(source_file
+  (semgrep_expression
+    (let_declaration
+      (identifier)
+      (identifier))
+    (ellipsis)
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)))
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)
+      )
+    )
+  )
+)
+
+=====================================
+Outer Attributes
+=====================================
+
+__SEMGREP_EXPRESSION
+#[cfg(test)]
+...
+
+---
+
+(source_file
+  (semgrep_expression
+    (item
+      (outer_attribute_item
+        (meta_item (identifier) (meta_arguments (meta_item (identifier)))))
+        (ellipsis))
+    )
+  )
+
+=====================================
+Inner Attributes
+=====================================
+
+#![cfg(test)]
+...
+
+---
+
+(source_file
+   (inner_attribute_item
+     (meta_item (identifier) (meta_arguments (meta_item (identifier)))))
+     (item (ellipsis))
+  )
+
+=====================================
+Match Statements
+=====================================
+
+__SEMGREP_EXPRESSION
+let $X = ...;
+...
+match ... {
+   ...
+   ... => $Y,
+   ...
+   $X => ...,
+   ...
+}
+
+---
+
+(source_file
+  (semgrep_expression
+    (let_declaration
+      (identifier)
+      (ellipsis))
+    (ellipsis)
+    (match_expression
+      (ellipsis)
+      (match_block
+         (ellipsis)
+         (match_arm
+           (match_pattern
+             (ellipsis))
+           (identifier))
+         (ellipsis)
+         (match_arm
+           (match_pattern
+             (identifier))
+           (ellipsis))
+         (ellipsis)
+         )
+       )
+     )
+   )
+
+=====================================
+Blocks
+=====================================
+
+__SEMGREP_EXPRESSION
+{
+   ...
+   let $X = ...;
+   ...
+}
+
+---
+
+(source_file
+  (semgrep_expression
+    (block
+      (ellipsis)
+      (let_declaration
+        (identifier)
+        (ellipsis))
+      (ellipsis)
+      )
+    )
+  )
+
+=====================================
+Unsafe Blocks
+=====================================
+
+__SEMGREP_EXPRESSION
+unsafe {
+   ...
+   let $X = ...;
+   ...
+}
+
+---
+
+(source_file
+  (semgrep_expression
+    (unsafe_block
+      (block
+        (ellipsis)
+        (let_declaration
+          (identifier)
+          (ellipsis))
+        (ellipsis)
+        )
+      )
+    )
+  )
+
+=====================================
+Functions
+=====================================
+
+__SEMGREP_EXPRESSION
+pub fn $FUNC1() -> $RETTYPE {
+  ...
+}
+...
+fn $FUNC2(&mut $PARAM1: mut $TYPE1, $PARAM2: $TYPE2) -> Result<...> {
+  let mut $X = Ok(...);
+  ...
+  $X
+}
+
+---
+
+(source_file
+  (semgrep_expression
+    (item (visibility_modifier)
+      (function_item
+        (function_declaration (identifier) (parameters) (type_identifier))
+        (block
+          (ellipsis))))
+    (ellipsis)
+    (item
+      (function_item
+        (function_declaration (identifier) (parameters) (type_identifier))
+        (block
+          (ellipsis))))
+  )
+)
+
+=====================================
+Functions with Ellipsis
+=====================================
+
+__SEMGREP_EXPRESSION
+fn $FUNC2(&mut $PARAM1: ..., ..., ...: mut $PARAM2) ... {
+  let mut $X = Ok(...);
+  ...
+  $X
+}
+
+---
+
+(source_file
+  (semgrep_expression
+    (unsafe_block
+      (block
+        (ellipsis)
+        (let_declaration
+          (identifier)
+          (ellipsis))
+        (ellipsis)
+        )
+      )
+    )
+  )
